@@ -30,10 +30,8 @@ class TestWebScraperSelenium(unittest.TestCase):
         datos_navegacion: set con las páginas que debe haber visitado tras la ejecución
         """
         # ACT, invocamos al método de extracción
-        # self.WebScraperSelenium.extrae()
-        # resultado = WebScraperSelenium.especificacion()  # Recogemos las URL visitadas
-        resultado = self.datos_navegacion = {'https://boe.es', 'https://boe.es/organismo/',
-                                 'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/'}
+        self.WebScraperSelenium.extrae()
+        resultado = WebScraperSelenium.especificacion()  # Recogemos las URL visitadas
         # ASSER, validamos los resultados
         error = f'se deberían haber visitado {self.datos_navegacion} páginas'
         self.assertEqual(len(resultado), len(self.datos_navegacion), error)
