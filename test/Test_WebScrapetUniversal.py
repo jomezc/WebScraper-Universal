@@ -21,7 +21,7 @@ class TestWebScraperSelenium(unittest.TestCase):
         ARRANGE, Inicialización del objeto WebScraperSelenium y establece los valores para las pruebas que vamos a hacer
         """
         self.WebScraperSelenium = WebScraperSelenium()
-        self.datos_navegacion = {'https://boe.es', 'https://boe.es/organismo/',
+        self.datos_navegacion = {'https://boe.es/', 'https://boe.es/organismo/',
                                  'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/'}
 
     def testNavegacion(self):
