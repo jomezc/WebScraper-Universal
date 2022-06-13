@@ -73,7 +73,7 @@ class WebScraperSelenium():
     WebScraper
     """
     # Variable estática
-    urls = set()
+    __urls = set()
     __comandos = {'URL.FIRST': 'self.driver.get(contenido)',
                   'WINDOW.SIZE': 'self.driver.set_window_size(ancho, alto)',
                   'DRIVER.BACK': 'self.driver.back()',
@@ -89,20 +89,48 @@ class WebScraperSelenium():
                   }
 
     def __init__(self):
-        self.tipo = 'Extracción con un motor visual'
-        self.datos = cargarFicheroDiccionario(ruta_relativa('archivos/configuracion.txt'), ' ')  # Contiene el diccionario con la configuración
-        self.acciones = cargaExcelVariable(ruta_relativa('archivos/Plantilla.xlsx'), 'str')  # Contiene el dataframe con las acciones
-        self.driver = webdriver.Chrome(self.datos['DRIVER'])  # Llama al chromedriver
-        self.variables = {}
+        self.__tipo = 'Extracción con un motor visual'
+        self.__datos = cargarFicheroDiccionario(ruta_relativa('archivos/configuracion.txt'), ' ')  # Contiene el diccionario con la configuración
+        self.__acciones = cargaExcelVariable(ruta_relativa('archivos/Plantilla.xlsx'), 'str')  # Contiene el dataframe con las acciones
+        self.__driver = webdriver.Chrome(self.datos['DRIVER'])  # Llama al chromedriver
+        self.__variables = {}
+
+    @property
+    def tipo(self):
+        return self.__tipo
+
+    @property
+    def datos(self):
+        return self.__datos
+
+    @property
+    def acciones(self):
+        return self.__acciones
+
+    @property
+    def driver(self):
+        return self.__driver
+
+    @property
+    def variables(self):
+        return self.__variables
+
+    @variables.setter
+    def variables(self, variables):
+        self.__variables = variables
+
+    @driver.setter
+    def driver(self, driver):
+        self.__driver = driver
 
 
     @classmethod
     def especificacion(cls, url=False):
         if url:
-            if url not in cls.urls:
-                cls.urls.add(url)
+            if url not in cls.__urls:
+                cls.__urls.add(url)
         else:
-            return cls.urls
+            return cls.__urls
 
     def apagar(self):
         """
