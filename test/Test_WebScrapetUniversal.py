@@ -41,7 +41,8 @@ class TestWebScraperSelenium(unittest.TestCase):
             'URL.FIRST: https://boe.es',
             'XPATH.CLICK: //*[@id="contenido"]/div[3]/div/ul[1]/li[1]/a',
             'XPATH.CLICK: //*[@id="contenido"]/div/div/ul/li[1]/a',
-            'XPATH.CLICK: //*[@id="menuPie"]/div/div[1]/div[1]/a'}
+            'XPATH.CLICK: //*[@id="menuPie"]/div/div[1]/div[1]/a',
+            'El Servicio de atención al ciudadano de la Agencia Estatal Boletín Oficial del Estado cuenta con personal especializado para resolver sus dudas y proporcionarle los documentos que necesite relacionados con la actividad, los servicios y los productos que gestiona la Agencia.'}
 
     def abrirFichero(self):
         try:
