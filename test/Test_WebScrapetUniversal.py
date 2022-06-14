@@ -58,10 +58,9 @@ class TestWebScraperSelenium(unittest.TestCase):
         Método de test de la tarea 1.1: Navegación por la pagina desde plantilla
         datos_navegacion: set con las páginas que debe haber visitado tras la ejecución
         """
-        # ARRANGE, Inicialización del objeto WebScraperSelenium
-        self.WebScraperSelenium = WebScraperSelenium()
+
         # ACT, invocamos al método de extracción
-        self.WebScraperSelenium.extrae()
+        self.WebScraperSelenium = WebScraperSelenium()
         self.resultado = WebScraperSelenium.especificacion()  # Recogemos las URL visitadas
         # ASSER, validamos los resultados
         error = f'se deberían haber visitado {self.datos_navegacion} páginas'

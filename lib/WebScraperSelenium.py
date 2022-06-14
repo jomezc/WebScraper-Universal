@@ -97,6 +97,7 @@ class WebScraperSelenium():
         self.__acciones = cargaExcelVariable(ruta_relativa('archivos/Plantilla.xlsx'), 'str')  # Contiene el dataframe con las acciones
         self.__driver = webdriver.Chrome(self.datos['DRIVER'])  # Llama al chromedriver
         self.__variables = {}
+        self.extrae()
 
     @property
     def tipo(self):
@@ -188,7 +189,7 @@ class WebScraperSelenium():
                 espera = int(self.acciones["ESPERA"][fila])
                 salida = str(self.acciones["SALIDA"][fila])
                 comando = str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])
-                info = f'***** Acción {fila} {comando}: {contenido} ******'
+                info = f'{datetime.datetime.now()}: ***** Acción {fila} {comando}: {contenido} ******'
                 ventana = self.driver.current_window_handle
                 # Vamos imprimiendo por consola y en el fichero las acciones
                 self.a_texto(info, fichero)
@@ -198,13 +199,14 @@ class WebScraperSelenium():
                     self.especificacion(self.driver.current_url)
 
                 except Exception as e:
-                    error = f'Error en el WebScraperSelenium al intentar guardar el manejador de la ventana:{e} '
+                    error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar Ejecutar una acción:{e} '
                     self.a_texto(error, fichero)
 
 
                 except Exception as e:
-                    print(f'Error en el WebScraperVisual al intentar ejecutar una acción:{e}')
-                    print(f'Vamos a intentar volver a hacer lo mismo esperando el tiempo definido')
+                    error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar ejecutar una acción:{e} ' \
+                            f'\n Vamos a intentar volver a hacer lo mismo esperando el tiempo definido'
+                    self.a_texto(error, fichero)
                     self.esperamos_pantalla(espera)
 
                     exec(self.__comandos[
@@ -213,8 +215,16 @@ class WebScraperSelenium():
                     self.especificacion(self.driver.current_url)
 
                     if salida == 'X':  # Si es salida significa que queremos esperar a que una salida o fichero se descargue
+                        info = f'{datetime.datetime.now()}: Esperamos la respuesta de la pagina ó la descarga de un contenido'
+                        self.a_texto(info, fichero)
                         self.esperamos(espera)
-
+            try:
+                visitadas = f"""***** FIN EXTRACCION ***** \n\nLas páginas visitadas han sido: {self.especificacion()}
+                """
+                self.a_texto(visitadas, fichero)
+            except Exception as e:
+                error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar grabar las páginas visitadas:{e}'
+                self.a_texto(error, fichero)
         except Exception as e:  # declaramos una excepción para poder tratar los posibles errores de lectura
             print(f'Error en el WebScraperVisual al intentar ejecutar una acción:{e}')
         finally:
