@@ -38,10 +38,10 @@ class TestWebScraperSelenium(unittest.TestCase):
                                  'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/'}
         self.fichero = 'datos.txt'
         self.datos_fichero = {
-            'URL.FIRST: https: // boe.es',
-            'XPATH.CLICK: // * [ @ id = "contenido"] / div[3] / div / ul[1] / li[1] / a',
-            'XPATH.CLICK: // * [ @ id = "contenido"] / div / div / ul / li[1] / a',
-            'XPATH.CLICK: // * [ @ id = "menuPie"] / div / div[1] / div[1] / a'}
+            'URL.FIRST: https://boe.es',
+            'XPATH.CLICK: //*[@id="contenido"]/div[3]/div/ul[1]/li[1]/a',
+            'XPATH.CLICK: //*[@id="contenido"]/div/div/ul/li[1]/a',
+            'XPATH.CLICK: //*[@id="menuPie"]/div/div[1]/div[1]/a'}
 
     def abrirFichero(self):
         try:

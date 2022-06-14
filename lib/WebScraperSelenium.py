@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 import time
 from datetime import date
-import os, sys
+import os, sys, datetime
 
 
 # FUNCIONES
@@ -80,12 +80,15 @@ class WebScraperSelenium():
                   'DRIVER.FORWARD': 'self.driver.forward()',
                   'DRIVER.REFRESH': 'self.driver.refresh()',
                   'XPATH.CLICK': 'WebDriverWait(self.driver, espera).until(EC.element_to_be_clickable((By.XPATH, contenido))).click()',
-                  'XPATH.DOUBLE_CLICK': 'ActionChains(self.driver).double_click(on_element = WebDriverWait(self.driver, espera).until(EC.element_to_be_clickable((By.XPATH, contenido)))).perform()',
-                  'XPATH.GET_HREF': 'self.driver.find_element(By.XPATH, contenido).get_attribute("href")',
-                  'XPATH.GET_IMG': 'self.driver.find_element(By.XPATH, contenido).get_attribute("src")',
-                  'XPATH.GET_PROPERTY': 'self.driver.find_element(By.XPATH, contenido).get_property(adicional)',
-                  'XPATH.GET_CSS': 'self.driver.find_element(By.XPATH, contenido).value_of_css_property(adicional)',
-                  'XPATH.GET_TXT': 'self.driver.find_element(By.XPATH, contenido).text'
+                  'XPATH.DOUBLE_CLICK':'ActionChains(self.driver).double_click(on_element = WebDriverWait(self.driver, espera).until(EC.element_to_be_clickable((By.XPATH, contenido)))).perform()',
+                  'XPATH.SEND_KEYS': 'WebDriverWait(self.driver, espera).until(EC.element_to_be_clickable((By.XPATH, contenido))).send_keys(adicional)',
+                  'XPATH.CLEAR': 'WebDriverWait(self.driver, espera).until(EC.element_to_be_clickable((By.XPATH, contenido))).clear()',
+                  'XPATH.GET_HREF': 'self.a_texto(self.driver.find_element(By.XPATH, contenido).get_attribute("href"),fichero)',
+                  'XPATH.GET_IMG': 'self.a_texto(self.driver.find_element(By.XPATH, contenido).get_attribute("src"),fichero)',
+                  'XPATH.GET_PROPERTY': 'self.a_texto(self.driver.find_element(By.XPATH, contenido).get_property(adicional),fichero)',
+                  'XPATH.GET_CSS': 'self.a_texto(self.driver.find_element(By.XPATH, contenido).value_of_css_property(adicional),fichero)',
+                  'XPATH.GET_TXT': 'self.a_texto(self.driver.find_element(By.XPATH, contenido).text,fichero)',
+
                   }
 
     def __init__(self):
@@ -152,43 +155,62 @@ class WebScraperSelenium():
         WebDriverWait(self, timeout).until(
             lambda driver: len(manejadores_antes) != len(driver.window_handles))
 
+    def a_texto(self, texto, fichero):
+        try:
+            fichero_r = ruta_relativa('archivos/' + fichero)
+            # OPEN **** puede abrir un archivo nuevo (si no existe) o existente y puede escribir en el o leer
+            archivo = open(fichero_r, 'a', encoding='utf8')  # encoding ='utf8' hace que permita acentos
+            archivo.write(texto + '\n\n')
+            print(texto + '\n\n')
+        except Exception as e:
+            print(e)
+        finally:
+            archivo.close()  # siempre debe cerrarse, despues de cerrar falla al escribir claro
+
     def extrae(self):
         ancho = self.datos['ANCHO_PANTALLA']
         alto = self.datos['ALTO_PANTALLA']
+        fichero = self.datos['ENTRADA']
+
         try:
             exec(self.__comandos['WINDOW.SIZE'])
+
+            if fichero != '':
+                try:
+                    fichero_r = ruta_relativa('archivos/' + fichero)
+                    os.remove(fichero_r)
+                except Exception as e:
+                    print(f'{datetime.datetime.now()}: Error al borrar el fichero:{e}')
 
             for fila in self.acciones.index:
                 contenido = str(self.acciones["CONTENIDO"][fila])
                 adicional = str(self.acciones["ADICIONAL"][fila])
                 espera = int(self.acciones["ESPERA"][fila])
                 salida = str(self.acciones["SALIDA"][fila])
-                dias = str(self.acciones["DIAS"][fila])
-                print(fila)
-                print(str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila]))
-                print(
-                    self.__comandos[str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
-                lista = dias.split(',')  # introducimos en una lista lis dias de filtro
-
+                comando = str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])
+                info = f'***** Acción {fila} {comando}: {contenido} ******'
+                ventana = self.driver.current_window_handle
+                # Vamos imprimiendo por consola y en el fichero las acciones
+                self.a_texto(info, fichero)
                 try:
-                    lista = list(map(int, lista))
-                except:
-                    lista = ()
-                if date.today().day in lista or len(
-                        lista) == 0:  # Si no hay filtro de dias o hoy es el un dia entre los días introducidos
-                    try:
-                        exec(self.__comandos[
-                                 str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
-                        self.especificacion(self.driver.current_url)
+                    exec(self.__comandos[
+                             str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
+                    self.especificacion(self.driver.current_url)
 
-                    except Exception as e:
-                        print(f'Error en el WebScraperVisual al intentar ejecutar una acción:{e}')
-                        print(f'Vamos a intentar volver a hacer lo mismo esperando el tiempo definido')
-                        self.esperamos_pantalla(espera)
+                except Exception as e:
+                    error = f'Error en el WebScraperSelenium al intentar guardar el manejador de la ventana:{e} '
+                    self.a_texto(error, fichero)
 
-                        exec(self.__comandos[
-                                 str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
-                        self.especificacion(self.driver.current_url)
+
+                except Exception as e:
+                    print(f'Error en el WebScraperVisual al intentar ejecutar una acción:{e}')
+                    print(f'Vamos a intentar volver a hacer lo mismo esperando el tiempo definido')
+                    self.esperamos_pantalla(espera)
+
+                    exec(self.__comandos[
+                        str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
+
+                    self.especificacion(self.driver.current_url)
 
                     if salida == 'X':  # Si es salida significa que queremos esperar a que una salida o fichero se descargue
                         self.esperamos(espera)
