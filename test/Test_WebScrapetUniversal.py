@@ -35,7 +35,7 @@ class TestWebScraperSelenium(unittest.TestCase):
         ARRANGE, Inicialización del objeto WebScraperSelenium y establece los valores para las pruebas que vamos a hacer
         """
         self.datos_navegacion = {'https://boe.es/', 'https://boe.es/organismo/',
-                                 'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/','https://boe.es/buscar/'}
+                                 'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/','https://boe.es/buscar/','https://boe.es/buscar/doc.php?id=BOE-A-1978-31229','https://boe.es/buscar/legislacion.php?campo%5B2%5D=tit&dato%5B2%5D=Constituci%C3%B3n%20Espa%C3%B1ola&accion=Buscar&checkbox_solo_tit=S&sort_field%5B0%5D=PESO&sort_order%5B0%5D=desc'}
         self.fichero = 'datos.txt'
         self.datos_fichero = {
             'URL.FIRST: https://boe.es',
@@ -45,8 +45,9 @@ class TestWebScraperSelenium(unittest.TestCase):
             'El Servicio de atención al ciudadano de la Agencia Estatal Boletín Oficial del Estado cuenta con personal especializado para resolver sus dudas y proporcionarle los documentos que necesite relacionados con la actividad, los servicios y los productos que gestiona la Agencia.',
             'GET_TXT: atencion-ciudadano',
             'Atención al ciudadano\n',
-            'Constitución Española'}
+            'XPATH.DOUBLE_CLICK: /html/body/div[4]/div/div[1]/div/ul/li[2]/a'}
         self.datos_descarga = ['A29313-29424.pdf']
+
     def abrirFichero(self):
         try:
             with open(ruta_relativa('archivos/datos.txt'), 'r', encoding='utf8') as archivo:
