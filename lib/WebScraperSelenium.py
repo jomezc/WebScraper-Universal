@@ -239,14 +239,18 @@ class WebScraperSelenium():
                 # Vamos imprimiendo por consola y en el fichero las acciones
                 self.a_texto(info, fichero)
                 try:
-                    exec(self.__comandos[
-                             str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
+                    exec(self.__comandos[comando])
                     self.especificacion(self.driver.current_url)
+                    if comando == 'VARS.HANDLE':
+                        try:
+                            ventana = self.driver.current_window_handle
+                        except Exception as e:
+                            error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar guardar el manejador de la ventana:{e} '
+                            self.a_texto(error, fichero)
 
                 except Exception as e:
                     error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar Ejecutar una acción:{e} '
                     self.a_texto(error, fichero)
-
 
                 except Exception as e:
                     error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar ejecutar una acción:{e} ' \
@@ -254,9 +258,7 @@ class WebScraperSelenium():
                     self.a_texto(error, fichero)
                     self.esperamos_pantalla(espera)
 
-                    exec(self.__comandos[
-                        str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])])
-
+                    exec(self.__comandos[comando])
                     self.especificacion(self.driver.current_url)
 
                     if salida == 'X':  # Si es salida significa que queremos esperar a que una salida o fichero se descargue
