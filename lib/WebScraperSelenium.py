@@ -67,26 +67,24 @@ def cargarFicheroDiccionario(nomFichero, separador):
     finally:
         return datos
 
+
 def renombra_Mueve_Descargas(datos):
     """
     Renombra los ficheros "base de cada dia a generico"
     """
-
     for identificador in datos['RENOMBRA'].split(','):
         try:
-            os.listdir(datos['RUTA_DESCARGA'])
-        except Exception as e:
-            print(f'Error en el Gestor al intentar renombrar o mover la descarga:{e}')
-        finally:
             for filename in os.listdir(datos['RUTA_DESCARGA']):
                 if filename.startswith(identificador):
                     try:
                         os.remove(datos['RUTA_DESTINO'] + identificador + datos['TIPO_FICHEROS'])
-                    except:
-                        print(f"no había fichero {identificador}")
+                    except Exception as e:
+                        print(f"{datetime.datetime.now()}: no había fichero {identificador} \n Error: {e}")
                     finally:
                         os.rename(datos['RUTA_DESCARGA'] + filename,
-                                    datos['RUTA_DESTINO'] + identificador + datos['TIPO_FICHEROS'])
+                                  datos['RUTA_DESTINO'] + identificador + datos['TIPO_FICHEROS'])
+        except Exception as e:
+            print(f'Error en el Gestor al intentar listar el directorio:{e}')
 
 
 class WebScraperSelenium():
