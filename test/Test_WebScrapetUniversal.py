@@ -35,14 +35,16 @@ class TestWebScraperSelenium(unittest.TestCase):
         ARRANGE, Inicialización del objeto WebScraperSelenium y establece los valores para las pruebas que vamos a hacer
         """
         self.datos_navegacion = {'https://boe.es/', 'https://boe.es/organismo/',
-                                 'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/'}
+                                 'https://boe.es/organismo/#presentacion_organismo', 'https://boe.es/contactar/','https://boe.es/buscar/'}
         self.fichero = 'datos.txt'
         self.datos_fichero = {
             'URL.FIRST: https://boe.es',
             'XPATH.CLICK: //*[@id="contenido"]/div[3]/div/ul[1]/li[1]/a',
             'XPATH.CLICK: //*[@id="contenido"]/div/div/ul/li[1]/a',
             'XPATH.CLICK: //*[@id="menuPie"]/div/div[1]/div[1]/a',
-            'El Servicio de atención al ciudadano de la Agencia Estatal Boletín Oficial del Estado cuenta con personal especializado para resolver sus dudas y proporcionarle los documentos que necesite relacionados con la actividad, los servicios y los productos que gestiona la Agencia.'}
+            'El Servicio de atención al ciudadano de la Agencia Estatal Boletín Oficial del Estado cuenta con personal especializado para resolver sus dudas y proporcionarle los documentos que necesite relacionados con la actividad, los servicios y los productos que gestiona la Agencia.',
+            'GET_TXT: atencion-ciudadano',
+            'Atención al ciudadano\n'}
 
     def abrirFichero(self):
         try:
