@@ -44,8 +44,9 @@ class TestWebScraperSelenium(unittest.TestCase):
             'XPATH.CLICK: //*[@id="menuPie"]/div/div[1]/div[1]/a',
             'El Servicio de atención al ciudadano de la Agencia Estatal Boletín Oficial del Estado cuenta con personal especializado para resolver sus dudas y proporcionarle los documentos que necesite relacionados con la actividad, los servicios y los productos que gestiona la Agencia.',
             'GET_TXT: atencion-ciudadano',
-            'Atención al ciudadano\n'}
-
+            'Atención al ciudadano\n',
+            'Constitución Española'}
+        self.datos_descarga = ['A29313-29424.pdf']
     def abrirFichero(self):
         try:
             with open(ruta_relativa('archivos/datos.txt'), 'r', encoding='utf8') as archivo:
@@ -95,6 +96,14 @@ class TestWebScraperSelenium(unittest.TestCase):
         * Son conjuntos, por lo que no existe el orden ni repeticiones, lo importante es que estén todos
         """
         self.assertEqual(resultado, self.datos_fichero, error)
+
+    def testDescarga(self):
+        # ACT, preparamos la variable
+        for fichero in self.datos_descarga:
+        # ASSER, validamos los resultados
+            error = f'fichero {fichero} no encontrado'
+            resultado = fichero in os.listdir(ruta_relativa('archivos/'))
+            self.assertEqual(resultado, True, error)
 
 
 #   MAIN
