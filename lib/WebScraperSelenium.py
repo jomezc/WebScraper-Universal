@@ -16,6 +16,12 @@ import time
 from datetime import date
 import os, sys, datetime
 from selenium.webdriver.chrome.options import Options
+from email.mime.multipart import MIMEMultipart
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from selenium.webdriver.chrome.options import Options
 
 # FUNCIONES
 
@@ -85,6 +91,47 @@ def renombra_Mueve_Descargas(datos):
                                   datos['RUTA_DESTINO'] + identificador + datos['TIPO_FICHEROS'])
         except Exception as e:
             print(f'Error en el Gestor al intentar listar el directorio:{e}')
+
+
+def prepara_manda_mail(datos):
+    # CONECTAMOS VIA SMTP A GMAIL
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(datos['DIRECCION_ORIGEN'], datos['CONTRASEÑA_MAIL'])
+
+    destinatarios = datos['DIRECCIONES_DESTINO'].strip().split(',')
+
+    msg = MIMEMultipart()
+    msg['Subject'] = datos['ASUNTO']
+    msg['From'] = datos['DIRECCION_ORIGEN']
+
+    html = """\
+        <html>
+        <head></head>
+        <body>
+        <p>Buenas, adjuntamos los archivos \n</p>
+        </body>
+        </html>
+        """
+    cuerpo = MIMEText(html, 'html')
+    msg.attach(cuerpo)
+
+    for fichero in os.listdir(ruta_relativa(datos['RUTA_DESTINO_PARCIAL'])):
+        for identificador in datos['FICHEROS_MAIL'].split(','):
+            if fichero.startswith(identificador):
+                try:
+                    fichero_path = ruta_relativa(datos['RUTA_DESTINO_PARCIAL'] + fichero)
+                    print(f'cargando fichero: {fichero}')
+                    part = MIMEBase('application', "octet-stream")
+                    with open(fichero_path, 'rb') as file:
+                        part.set_payload(file.read())
+                        encoders.encode_base64(part)
+                        part.add_header('Content-Disposition', 'attachment', filename=fichero)
+                        msg.attach(part)
+                except Exception as e:
+                    print(f"Error aql adjuntar el archi val mail {fichero} \n Error: {e}")
+
+    server.sendmail(msg['From'], destinatarios, msg.as_string())
 
 
 class WebScraperSelenium():
@@ -194,6 +241,8 @@ class WebScraperSelenium():
         self.__variables = {}
         self.extrae()
         renombra_Mueve_Descargas(self.datos)
+        if self.datos['MANDA_MAIL'] == 'SI':
+            prepara_manda_mail(self.datos)
 
     @property
     def tipo(self):

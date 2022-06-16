@@ -5,13 +5,12 @@ Grado en Ingeniería Informática - Web Scraping universal con entrada - UNIR
 """
 
 # LIB
-import unittest, os, sys
+import unittest, os, sys,time
 from lib.WebScraperSelenium import WebScraperSelenium
-
+import pytest
 import imaplib
-import os
+import base64
 import email
-
 def descargaMail(usuario, contraseña, host, puerto, ruta):
     """
     Versión modificada basada en:  (Doshi, 2018). To read emails and download attachments in Python
@@ -64,7 +63,7 @@ def descargaMail(usuario, contraseña, host, puerto, ruta):
                     fp.write(parte.get_payload(decode=True))
                     fp.close()
                 subject = str(email_message).split("Subject: ", 1)[1].split("\nTo:", 1)[0]
-                correo_descargado.append(f'Hemos descargado "{fileName}" del mail con asunto "{subject}".')
+                # correo_descargado.append(f'Hemos descargado "{fileName}" del mail con asunto "{subject}".')
 
     for parte_Respuesta in datos:
         if isinstance(parte_Respuesta, tuple):
@@ -120,9 +119,8 @@ class TestWebScraperSelenium(unittest.TestCase):
         self.datos_descarga = ['A29313-29424.pdf']
         self.adjuntos_mail = ['A29313-29424.pdf']
         self.datos_mail = {
-            'A29313-29424.pdf',
-            'Extración_web',
-            'fulgenciovalleverde@gmail.com'}
+            'Subject : WebScraping\n',
+            'From : fulgenciovalleverde@gmail.com\n'}
         self.usuario = 'fulgenciovalleverde@gmail.com'
         self.contraseña = 'gfmxjfwesjygolge'
         self.host = 'imap.gmail.com'
@@ -155,6 +153,33 @@ class TestWebScraperSelenium(unittest.TestCase):
             error = f'La página {dato} debía haber sido visitada y no está registrada'
             self.assertEqual(dato in self.resultado, True, error)  # Compara el resultado con lo esperado (sea igual)
         del self.WebScraperSelenium
+
+        time.sleep(15)
+        # ACT, invocamos al método de descarga de mail
+        correo_descargado = descargaMail(self.usuario, self.contraseña,
+                                         self.host, self.puerto, self.ruta)
+        correo_descargado = set(correo_descargado)
+        # ASSER, validamos los resultados
+
+        # Ficheros en directorio
+        for fichero in self.adjuntos_mail:
+            error = f'fichero {fichero} no encontrado'
+            resultado = fichero in os.listdir(ruta_relativa('test/DescargaEmail/'))
+            self.assertEqual(resultado, True, error)
+
+        # compresión de lista para comprobar si el esperado (datos_fichero)
+        # está en el fichero cargado (contenido_fichero) (Delfstack, 2021)
+        print(self.datos_mail)
+        print(correo_descargado)
+        resultado = {dato for dato in self.datos_mail if dato in correo_descargado}
+        error = f"""
+                                        No se han encontrado todos los pasos en el fichero, el contenido es
+                                        {correo_descargado}
+                                        Se ha encontrado: {resultado}
+                                        Esperaba: {self.datos_fichero}
+                                        * Son conjuntos, por lo que no existe el orden ni repeticiones, lo importante es que estén todos
+                                """
+        self.assertEqual(resultado, self.datos_mail, error)
 
     def testFichero(self):
         """
@@ -191,28 +216,8 @@ class TestWebScraperSelenium(unittest.TestCase):
 
 
     def testEmail(self):
-        # ACT, invocamos al método de descarga de mail
-        correo_descargado = descargaMail(self.usuario, self.contraseña,
-                                         self.host, self.puerto, self.ruta)
-        # ASSER, validamos los resultados
+        pass
 
-        # Ficheros en directorio
-        for fichero in self.adjuntos_mail:
-            error = f'fichero {fichero} no encontrado'
-            resultado = fichero in os.listdir(ruta_relativa('test/DescargaEmail/'))
-            self.assertEqual(resultado, True, error)
-
-        # compresión de lista para comprobar si el esperado (datos_fichero)
-        # está en el fichero cargado (contenido_fichero) (Delfstack, 2021)
-        resultado = {dato for dato in self.datos_mail if any(dato in linea for linea in correo_descargado)}
-        error = f"""
-                No se han encontrado todos los pasos en el fichero, el contenido es
-                {correo_descargado}
-                Se ha encontrado: {resultado}
-                Esperaba: {self.datos_fichero}
-                * Son conjuntos, por lo que no existe el orden ni repeticiones, lo importante es que estén todos
-        """
-        self.assertEqual(resultado, self.datos_mail, error)
 
 #   MAIN
 if __name__ == '__main__':
