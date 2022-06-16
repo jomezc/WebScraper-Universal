@@ -169,8 +169,7 @@ class TestWebScraperSelenium(unittest.TestCase):
 
         # compresión de lista para comprobar si el esperado (datos_fichero)
         # está en el fichero cargado (contenido_fichero) (Delfstack, 2021)
-        print(self.datos_mail)
-        print(correo_descargado)
+
         resultado = {dato for dato in self.datos_mail if dato in correo_descargado}
         error = f"""
                                         No se han encontrado todos los pasos en el fichero, el contenido es

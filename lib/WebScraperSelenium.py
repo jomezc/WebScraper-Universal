@@ -212,6 +212,7 @@ class WebScraperSelenium():
         self.opciones_chrome.add_argument("--disable-extensions")
         self.opciones_chrome.add_argument("--start-maximized")
         self.opciones_chrome.add_argument("--disable-dev-shm-usage")
+        self.opciones_chrome.add_argument("--headless")
         profile = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
                    "download.default_directory": self.datos['RUTA_DESCARGA_CONSOLA'],
                    "download.extensions_to_open": "application/pdf",
@@ -324,53 +325,59 @@ class WebScraperSelenium():
                     print(f'{datetime.datetime.now()}: Error al borrar el fichero:{e}')
 
             for fila in self.acciones.index:
+                # Variables temporales de bucle
                 contenido = str(self.acciones["CONTENIDO"][fila])
                 adicional = str(self.acciones["ADICIONAL"][fila])
                 espera = int(self.acciones["ESPERA"][fila])
                 salida = str(self.acciones["SALIDA"][fila])
+                dias = str(self.acciones["DIAS"][fila])
                 comando = str(self.acciones["IDENTIFICADOR"][fila]) + '.' + str(self.acciones["TIPO"][fila])
                 info = f'{datetime.datetime.now()}: ***** Acción {fila} {comando}: {contenido} ******'
+                lista = dias.split(',')  # introducimos en una lista los dias de filtro
                 ventana = self.driver.current_window_handle
                 # Vamos imprimiendo por consola y en el fichero las acciones
                 self.a_texto(info, fichero)
                 try:
-                    exec(self.__comandos[comando])
-                    self.especificacion(self.driver.current_url)
-                    if comando == 'VARS.HANDLE':
-                        try:
-                            ventana = self.driver.current_window_handle
-                        except Exception as e:
-                            error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar guardar el manejador de la ventana:{e} '
-                            self.a_texto(error, fichero)
-                    if salida == 'X':  # Si es salida significa que queremos esperar a que una salida o fichero se descargue
-                        info = f'{datetime.datetime.now()}: Esperamos la respuesta de la pagina ó la descarga de un contenido'
-                        self.a_texto(info, fichero)
-                        self.esperamos(espera)
-                except Exception as e:
-                    error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar Ejecutar una acción:{e} '
-                    self.a_texto(error, fichero)
+                    lista = list(map(int, lista))
 
-                except Exception as e:
-                    error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar ejecutar una acción:{e} ' \
-                            f'\n Vamos a intentar volver a hacer lo mismo esperando el tiempo definido'
-                    self.a_texto(error, fichero)
-                    self.esperamos_pantalla(espera)
+                except:
+                    lista = ()
+                if date.today().day in lista or len(
+                        lista) == 0:  # Si no hay filtro de dias o hoy es el un dia entre los días introducidos
+                    try:
+                        exec(self.__comandos[comando])
+                        self.especificacion(self.driver.current_url)
+                        if comando == 'VARS.HANDLE':
+                            try:
+                                ventana = self.driver.current_window_handle
+                            except Exception as e:
+                                error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar guardar el manejador de la ventana:{e} '
+                                self.a_texto(error, fichero)
+                    except Exception as e:
 
-                    exec(self.__comandos[comando])
-                    self.especificacion(self.driver.current_url)
+                        error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar ejecutar una acción:{e} ' \
+                                f'\n Vamos a intentar volver a hacer lo mismo esperando el tiempo definido'
+                        self.a_texto(error, fichero)
+                        self.esperamos_pantalla(espera)
+                        exec(self.__comandos[comando])
+                        self.especificacion(self.driver.current_url)
 
                     if salida == 'X':  # Si es salida significa que queremos esperar a que una salida o fichero se descargue
                         info = f'{datetime.datetime.now()}: Esperamos la respuesta de la pagina ó la descarga de un contenido'
                         self.a_texto(info, fichero)
                         self.esperamos(espera)
             try:
-                visitadas = f"""***** FIN EXTRACCION ***** \n\nLas páginas visitadas han sido: {self.especificacion()}
-                """
+                visitadas = f"""{datetime.datetime.now()}: ***** FIN EXTRACCION ***** 
+                \n\nLas páginas visitadas han sido: {self.especificacion()}"""
                 self.a_texto(visitadas, fichero)
             except Exception as e:
                 error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar grabar las páginas visitadas:{e}'
                 self.a_texto(error, fichero)
+
+
         except Exception as e:  # declaramos una excepción para poder tratar los posibles errores de lectura
-            print(f'Error en el WebScraperVisual al intentar ejecutar una acción:{e}')
+            error = f'{datetime.datetime.now()}: Error en el WebScraperSelenium al intentar ejecutar una acción:{e}'
+            self.a_texto(error, fichero)
+
         finally:
             self.apagar()
