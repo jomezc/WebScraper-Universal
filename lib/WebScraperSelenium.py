@@ -4,24 +4,8 @@ Created on Fri Apr 26 20:33:45 2022
 Grado en Ingeniería Informática - Web Scraping universal con entrada - UNIR
 """
 # LIBRERIAS
+from lib.libExternas import *
 
-from pandas import read_excel  # Solo nos traemos lo estrictamente necesario
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.select import Select
-import time
-from datetime import date
-import os, sys, datetime
-from selenium.webdriver.chrome.options import Options
-from email.mime.multipart import MIMEMultipart
-import smtplib
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
-from selenium.webdriver.chrome.options import Options
 
 # FUNCIONES
 
@@ -69,7 +53,7 @@ def cargarFicheroDiccionario(nomFichero, separador):
                 clave, valor = linea.split(separador, 1)  # un split por ser a medida de un diccionario
                 datos[clave] = valor
     except Exception as e:  # declaramos una excepción para poder tratar los posibles errores de lectura
-        print(f'Error en el gestor al intentar cargar la el fichero {nomFichero}:{e}')
+        print(f'{datetime.datetime.now()}: Error en el gestor al intentar cargar la el fichero {nomFichero}:{e}')
     finally:
         return datos
 
@@ -221,12 +205,13 @@ class WebScraperSelenium():
 
     def __init__(self):
         self.__tipo = 'Extracción con un motor visual'
-        self.__datos = cargarFicheroDiccionario(ruta_relativa('archivos/configuracion.txt'), ' ')  # Contiene el diccionario con la configuración
+        self.__datos = cargarFicheroDiccionario(ruta_relativa('archivos/configuracion.txt'), ';')  # Contiene el diccionario con la configuración
         self.__acciones = cargaExcelVariable(ruta_relativa('archivos/Plantilla.xlsx'), 'str')  # Contiene el dataframe con las acciones
-        chrome_options = Options()
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        self.__variables = {}
+        self.opciones_chrome = Options()
+        self.opciones_chrome.add_argument("--disable-extensions")
+        self.opciones_chrome.add_argument("--start-maximized")
+        self.opciones_chrome.add_argument("--disable-dev-shm-usage")
         profile = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
                    "download.default_directory": self.datos['RUTA_DESCARGA_CONSOLA'],
                    "download.extensions_to_open": "application/pdf",
@@ -236,13 +221,8 @@ class WebScraperSelenium():
                    "download.directory_upgrade": True,
                    "plugins.always_open_pdf_externally": True
                    }
-        chrome_options.add_experimental_option("prefs", profile)
-        self.__driver = webdriver.Chrome(self.datos['DRIVER'], options=chrome_options)
-        self.__variables = {}
-        self.extrae()
-        renombra_Mueve_Descargas(self.datos)
-        if self.datos['MANDA_MAIL'] == 'SI':
-            prepara_manda_mail(self.datos)
+        self.opciones_chrome.add_experimental_option("prefs", profile)
+        self.ejecutar()
 
     @property
     def tipo(self):
@@ -280,6 +260,13 @@ class WebScraperSelenium():
                 cls.__urls.add(url)
         else:
             return cls.__urls
+
+    def ejecutar(self):
+        self.__driver = webdriver.Chrome(self.datos['DRIVER'], options=self.opciones_chrome)
+        self.extrae()
+        renombra_Mueve_Descargas(self.datos)
+        if self.datos['MANDA_MAIL'] == 'SI':
+            prepara_manda_mail(self.datos)
 
     def apagar(self):
         """
