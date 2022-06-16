@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pandas import read_excel  # Solo nos traemos lo estrictamente necesario
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -15,3 +16,4 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from selenium.webdriver.chrome.options import Options
+
